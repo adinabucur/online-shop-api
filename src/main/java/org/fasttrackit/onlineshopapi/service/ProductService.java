@@ -1,15 +1,23 @@
+
+
+
+
+
 package org.fasttrackit.onlineshopapi.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.fasttrackit.onlineshopapi.domain.Product;
 import org.fasttrackit.onlineshopapi.exception.ResourceNotFoundException;
 import org.fasttrackit.onlineshopapi.persistence.ProductRepository;
-import org.fasttrackit.onlineshopapi.transfer.CreateProductRequest;
-import org.fasttrackit.onlineshopapi.transfer.UpdateProductRequest;
+import org.fasttrackit.onlineshopapi.transfer.product.CreateProductRequest;
+import org.fasttrackit.onlineshopapi.transfer.product.GetProductsRequest;
+import org.fasttrackit.onlineshopapi.transfer.product.UpdateProductRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -33,26 +41,55 @@ public class ProductService {
         return productRepository.save(product);
     }
 
-    public Product getProduct (long id) throws ResourceNotFoundException {
-        LOGGER.info("Retrieving product{}", id);
+    public Product getProduct(long id) throws ResourceNotFoundException {
+        LOGGER.info("Retrieving product {}", id);
         return productRepository.findById(id)
-                //Optional and lambda expression
-                .orElseThrow(() -> new ResourceNotFoundException("Product " + id + " not found"));
-
+                // Optional and lambda expression
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Product " + id + " not found"));
     }
 
-    public Product updateProduct (long id, UpdateProductRequest request) throws ResourceNotFoundException {
-        LOGGER.info("Updating product{}, {}", id, request);
+    public Page<Product> getProducts(GetProductsRequest request, Pageable pageable) {
+        LOGGER.info("Retrieving products >> {}", request);
+
+        //not an elegant solution, but the easiest one for now
+
+        if (request.getPartialName() != null &&
+                request.getMinimumQuantity() != null &&
+                request.getMinimumPrice() != null &&
+                request.getMaximumPrice() != null) {
+            return productRepository.findByNameContainingAndPriceBetweenAndQuantityGreaterThanEqual(
+                    request.getPartialName(), request.getMinimumPrice(),
+                    request.getMaximumPrice(), request.getMinimumQuantity(), pageable);
+
+        } else if (request.getMinimumPrice() != null &&
+                request.getMaximumPrice() != null &&
+                request.getMinimumQuantity() != null) {
+            return productRepository.findByPriceBetweenAndQuantityGreaterThanEqual(
+                    request.getMinimumPrice(), request.getMaximumPrice(),
+                    request.getMinimumQuantity(), pageable);
+
+        } else if (request.getPartialName() != null &&
+                request.getMinimumQuantity() != null) {
+            return productRepository.findByNameContainingAndQuantityGreaterThanEqual(
+                    request.getPartialName(), request.getMinimumQuantity(), pageable);
+        }
+
+        return productRepository.findAll(pageable);
+    }
+
+    public Product updateProduct(long id, UpdateProductRequest request) throws ResourceNotFoundException {
+        LOGGER.info("Updating product {}, {}", id, request);
         Product product = getProduct(id);
 
         BeanUtils.copyProperties(request, product);
-        return productRepository.save(product);
 
+        return productRepository.save(product);
     }
 
-    public void deleteProduct (long id){
+    public void deleteProduct(long id) {
         LOGGER.info("Deleting product {}", id);
         productRepository.deleteById(id);
-        LOGGER.info("Deleting product {}", id);
+        LOGGER.info("Deleted product {}", id);
     }
 }
