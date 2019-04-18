@@ -32,7 +32,7 @@ public class CustomerService {
     }
 
     public Customer getCustomer (long id) throws ResourceNotFoundException {
-        LOGGER.info("Retrieving product{}", id);
+        LOGGER.info("Retrieving customer{}", id);
         return customerRepository.findById(id)
                 //Optional and lambda expression
                 .orElseThrow(() -> new ResourceNotFoundException("Product " + id + " not found"));

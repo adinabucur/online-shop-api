@@ -1,8 +1,3 @@
-
-
-
-
-
 package org.fasttrackit.onlineshopapi.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,6 +43,8 @@ public class ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Product " + id + " not found"));
     }
+
+
 
     public Page<Product> getProducts(GetProductsRequest request, Pageable pageable) {
         LOGGER.info("Retrieving products >> {}", request);
