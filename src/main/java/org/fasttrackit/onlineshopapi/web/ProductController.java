@@ -62,5 +62,6 @@ public class ProductController {
 
         Page<Product> response = productService.getProducts(request, pageable);
         return new ResponseEntity<>(response, HttpStatus.OK);
+
     }
 }
