@@ -6,6 +6,7 @@ import org.fasttrackit.onlineshopapi.service.ProductService;
 import org.fasttrackit.onlineshopapi.steps.ProductSteps;
 import org.fasttrackit.onlineshopapi.transfer.product.CreateProductRequest;
 import org.fasttrackit.onlineshopapi.transfer.product.GetProductsRequest;
+import org.fasttrackit.onlineshopapi.transfer.product.ProductResponse;
 import org.fasttrackit.onlineshopapi.transfer.product.UpdateProductRequest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -99,7 +100,7 @@ public class ProductServiceIntegrationTests {
         request.setMaximumPrice(10.1);
         request.setMinimumQuantity(1);
 
-        Page<Product> products =
+        Page<ProductResponse> products =
         productService.getProducts(request, PageRequest.of(0,10));
 
         assertThat(products.getTotalElements(), greaterThanOrEqualTo(1L));
